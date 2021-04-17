@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.dao.OrderSettingDao">
+
+    <!--新增-->
+    <insert id="add" parameterType="orderSetting">
+        insert into t_ordersetting(orderDate,number,reservations) values (#{orderDate},#{number},#{reservations})
+    </insert>
+
+    <!--根据日期更新预约人数-->
+    <update id="editNumberByOrderDate" parameterType="orderSetting">
+        update t_ordersetting set number = #{number} where orderDate = #{orderDate}
+    </update>
+
+
+
+    <!--根据预约日期查询-->
+    <select id="findCountByOrderDate" resultType="java.lang.Long" parameterType="date">
+        select count(*) from t_ordersetting where orderDate=#{orderDate}
+    </select>
+
+    <!--根据月份查询数据进行回显-->
+    <select id="getOrderSettingByMonth" resultType="orderSetting" parameterType="hashmap">
+        select * from t_ordersetting where orderDate between #{dateBegin} and #{dateEnd}
+    </select>
+
+    <!--根据日期查询预约是否存在，存在的话用户才能预约-->
+    <select id="getOrderSettingByOrderDate" resultType="orderSetting" parameterType="date">
+        select * from t_ordersetting where orderDate=#{date}
+    </select>
+
+    <update id="editReservationsByOrderDate" parameterType="orderSetting">
+        update t_ordersetting set reservations=#{reservations} where orderDate=#{orderDate}
+    </update>
+</mapper>

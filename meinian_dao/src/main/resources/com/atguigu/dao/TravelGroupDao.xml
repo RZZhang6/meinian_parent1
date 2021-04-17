@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.dao.TravelGroupDao">
+
+    <!--新增组团游-->
+    <insert id="add" parameterType="travelGroup" keyProperty="id" useGeneratedKeys="true">
+        insert into t_travelgroup(id, code, name, helpCode, sex, remark, attention)
+        values(#{id}, #{code}, #{name}, #{helpCode}, #{sex}, #{remark}, #{attention})
+    </insert>
+
+    <!--维护关系表-->
+    <insert id="addTravelGroupAndTravelItem" parameterType="map">
+        insert into t_travelgroup_travelitem(travelgroup_id, travelitem_id)
+        values(#{travelGroupId},#{travelItemId})
+    </insert>
+
+    <!--更新跟团游-->
+    <update id="edit" parameterType="TravelGroup" keyProperty="id" useGeneratedKeys="true">
+    update t_travelgroup
+    <set>
+
+        <if test="code!=null and code.length>0">
+            code=#{code},
+        </if>
+        <if test="name!=null and name.length>0">
+            name=#{name},
+        </if>
+        <if test="helpCode!=null and helpCode.length>0">
+            helpCode=#{helpCode},
+        </if>
+        <if test="sex!=null and sex.length>0">
+            sex=#{sex},
+        </if>
+        <if test="remark!=null and remark.length>0">
+            remark=#{remark},
+        </if>
+        <if test="attention!=null and attention.length>0">
+            attention=#{attention}
+        </if>
+    </set>
+    where id=#{id}
+    </update>
+
+    <!--删除中间表数据-->
+    <delete id="delete" parameterType="integer">
+        delete from t_travelgroup_travelitem where travelgroup_id=#{id}
+    </delete>
+
+    <!--分页查询-->
+    <select id="findPage" resultType="TravelGroup" parameterType="string">
+        select * from t_travelgroup
+        <where>
+            <if test="queryString!=null and queryString.length>0">
+                code=#{queryString} or name like concat("%",#{queryString},"%") or helpCode=#{queryString}
+            </if>
+        </where>
+    </select>
+    <!--根据跟团游的Id进行数据回显-->
+    <select id="getById" resultType="TravelGroup" parameterType="integer">
+        select * from t_travelgroup where id=#{id}
+    </select>
+
+    <!--根据跟团游的Id查询中间表自由行的ids-->
+    <select id="getTravelitemIdsByTravelGroupId" resultType="java.lang.Integer" parameterType="integer">
+        select travelitem_id from t_travelgroup_travelitem where travelgroup_id=#{travelGroupId}
+    </select>
+
+    <!--查询所有的跟团游信息做回显-->
+    <select id="findAll" resultType="TravelGroup">
+        select * from t_travelgroup
+    </select>
+    
+    <resultMap id="findByIdResultMap" type="travelGroup">
+        <id property="id" column="id"></id>
+        <result property="code" column="code" /> 
+        <result property="name" column="name" /> 
+        <result property="helpCode" column="helpCode" /> 
+        <result property="sex" column="sex" /> 
+        <result property="remark" column="remark" /> 
+        <result property="attention" column="attention" /> 
+        <collection property="travelItems" column="id" select="com.atguigu.dao.TravelItemDao.findTravelItemListById"/>
+        
+    </resultMap>        
+        
+    <!--根据套餐id查询所有的跟团游信息，1对多-->
+    <!--         select * from  t_travelgroup where id in(select travelgroup_id from t_setmeal_travelgroup where setmeal_id=#{id})-->
+    <select id="findTravelGroupListById"  parameterType="int" resultMap="findByIdResultMap">
+
+        select * from t_travelgroup a inner join t_setmeal_travelgroup b on a.id=b.travelgroup_id where b.setmeal_id=#{id}
+    </select>
+
+
+</mapper>
